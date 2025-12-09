@@ -1,0 +1,100 @@
+
+function viewXshorePointElevations(MopNum,MonthStart,MonthEnd,Xdist)
+%
+%  eg viewXshorePointElevations(582,9,15,80)
+%
+% MopNum=583;
+% MonthStart=9;
+% MonthEnd=15;
+% Xdist=80;
+% script to display survey elevation vs the day/time of the month
+% for a specified Mop Number and xshore distance from the back beach
+% line.
+
+% load survey morpho mat file
+load([ 'M'  num2str( MopNum , '%5.5i' )  'SM.mat' ],'SM');
+
+% load global morpho mat file
+load([ 'M'  num2str( MopNum , '%5.5i' )  'GM.mat' ],'GM');
+
+% get the months and days of all surveys
+SurvYears=year(datetime([SM.Datenum],'convert','datenum'));
+SurvMonths=month(datetime([SM.Datenum],'convert','datenum'));
+% turn Jan-Mar into months > december
+SurvMonths(SurvMonths < 4)=SurvMonths((SurvMonths < 4))+12;
+SurvDays=day(datetime([SM.Datenum],'convert','datenum'));
+% make approx fraction month dates
+MonthDay=SurvMonths+SurvDays/30;
+
+% index of surveys in the month of MopMonth
+midx=find(SurvMonths >= MonthStart & SurvMonths <= MonthEnd);
+
+% plot transect profile elevations at location Xdist for all midx surveys
+figure('position',[243    99   815   702]); 
+subplot(2,1,1);hold on;
+
+cnum=1+SurvYears-min(SurvYears);
+cm=jet(max(cnum));
+
+for n=midx
+    [dmin,imin]=min(abs(SM(n).X1D-Xdist));
+    plot(MonthDay(n),SM(n).Z1Dmean(imin),'.',...
+        'color',cm(cnum(n),:),'markersize',15);
+end
+yl=get(gca,'ylim'); % get ylimits for mean profile plot
+grid on;
+% show tide levels
+            ztide=[-0.631 -.058 .218 .774 1.344 1.566 2.119 ];
+            xl=get(gca,'xlim');
+            for n=1:length(ztide)
+                if n == 4
+                 plot(xl,[ztide(n) ztide(n)],'b--');
+                elseif n == 2
+                    plot(xl,[ztide(n) ztide(n)],'k:','linewidth',2);
+                else
+                 plot(xl,[ztide(n) ztide(n)],'b:','linewidth',1);  
+                end
+            end
+
+        text(xl(end),ztide(1),' LAT','fontsize',14);
+        text(xl(end),ztide(2),' MLLW');
+        text(xl(end),ztide(3),' MLW');
+        text(xl(end),ztide(4),' MSL','fontsize',14);
+        text(xl(end),ztide(5),' MHW');
+        text(xl(end),ztide(6),' MHHW');
+        text(xl(end),ztide(7),' HAT','fontsize',14);
+       
+        xlabel('Fractional Month ( 13+ = Jan+ )');ylabel('Elevation (m, NAVD88)');
+        title(['Historical Profile Elevations Sep-Mar, Mop # ' num2str(MopNum)...
+            ' ; Xshore Distance: ' num2str(Xdist) 'm'],'fontsize',16) 
+        colormap(cm);colorbar('location','north');set(gca,'clim',...
+            [min(SurvYears) max(SurvYears)]);
+      
+subplot(2,1,2);hold on;
+plot(GM.X1D,GM.Z1Dmean);set(gca,'xdir','reverse');
+xlabel('Xshore Distance (m)');ylabel('Elevation (m, NAVD88)');
+title('Global Mean Profile : All Surveys, All Months');
+grid on;
+% show tide levels
+            ztide=[ -.058 .774 1.566  ];
+            xl=get(gca,'xlim');
+            for n=1:length(ztide)
+                if n == 4
+                 plot(xl,[ztide(n) ztide(n)],'b--');  
+                else
+                 plot(xl,[ztide(n) ztide(n)],'b:','linewidth',1);  
+                end
+            end
+
+        %text(xl(1),ztide(1),' LAT','fontsize',14);
+        text(xl(1),ztide(1),' MLLW');
+        %text(xl(1),ztide(3),' MLW');
+        text(xl(1),ztide(2),' MSL','fontsize',14);
+        %text(xl(1),ztide(5),' MHW');
+        text(xl(1),ztide(3),' MHHW');
+        %text(xl(1),ztide(7),' HAT','fontsize',14);
+        set(gca,'xlim',[xl(1) Xdist+100]);
+        yl=get(gca,'ylim');
+        plot([Xdist Xdist],[yl(1) yl(2)],'k-','linewidth',2);
+end     
+        

@@ -1,0 +1,12 @@
+
+figure;hold on;
+
+for ns=1:size(SM,2)
+    n=length(SM(ns).X1D);
+    plot3(SM(ns).X1D,SM(ns).Datenum*ones(1,n),SM(ns).Z1Dmean,'k-');
+    hold on;
+end
+view(3)
+datetick(gca,'y');set(gca,'xdir','reverse');
+grid on;
+

@@ -1,0 +1,22 @@
+   function [marker_x,marker_y]=EqualSpacedPoints(x,y,n)
+
+% used by GetTransectLines.m , which is used by BuildSMmatfiles.m
+   
+%    x = [0 5 10];
+%    y = [2 4 1];
+%    n=10;
+   dist_from_start = cumsum( [0, sqrt((x(2:end)-x(1:end-1)).^2 + (y(2:end)-y(1:end-1)).^2)] );
+   marker_dist = dist_from_start(end)/n;
+   marker_locs = marker_dist/2 : marker_dist : dist_from_start(end);   %replace with specific distances if desired
+   marker_indices = interp1( dist_from_start, 1 : length(dist_from_start), marker_locs);
+   marker_base_pos = floor(marker_indices);
+   weight_second = marker_indices - marker_base_pos;
+   marker_x = x(marker_base_pos) .* (1-weight_second) + x(marker_base_pos+1) .* weight_second;
+   marker_y = y(marker_base_pos) .* (1-weight_second) + y(marker_base_pos+1) .* weight_second;
+%    figure;
+%    plot(x, y);
+%    hold on;
+%    plot(marker_x, marker_y, 'r+');
+%    hold off
+   
+   end

@@ -1,0 +1,32 @@
+MATLAB is selecting SOFTWARE rendering.
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2024 The MathWorks, Inc.
+             R2024a Update 5 (24.1.0.2653294) 64-bit (glnxa64)
+                               June 24, 2024
+
+ 
+To get started, type doc.
+For product information, visit www.mathworks.com.
+ 
+>> >> >> 
+ans =
+
+    '05-May-2025 06:00:06'
+
+>> >> >> >> >> >> >> >> 
+ans =
+
+    '05-May-2025 11:00:00'
+
+[Warning: MATLAB has disabled some advanced graphics rendering features by
+switching to software OpenGL. For more information, click <a
+href="matlab:opengl('problems')">here</a>.] 
+Output image written to: ../../www/MopD0654RunupForecast.png 
+ >> >> 
+ans =
+
+    '05-May-2025 11:00:00'
+
+Output image written to: ../../www/MopD0511RunupForecast.png 
+ >> >> >> >> 

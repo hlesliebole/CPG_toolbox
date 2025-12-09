@@ -1,0 +1,43 @@
+
+ng0=[];ng1=[];ng2=[];ng3=[];ng4=[];ng5=[];
+for dz=0.005:.001:0.03
+  g=ElevGoodnessQCv1(x,y,z,dz);
+  ng0=[ng0 length(find(g(:) == 0))];
+  ng1=[ng1 length(find(g(:) == 1))];
+  ng2=[ng2 length(find(g(:) == 2))];
+  ng3=[ng3 length(find(g(:) == 3))];
+  ng4=[ng4 length(find(g(:) == 4))];
+  ng5=[ng5 length(find(g(:) == 5))];
+end
+
+xdz=100*(0.005:.001:0.03);
+figure(position',[273   138   590   658]);hold on
+p1=plot(xdz,ng0,'-o','linewidth',2,'markersize',5);
+p2=plot(xdz,ng1,'-o','linewidth',2,'markersize',5);
+p3=plot(xdz,ng2,'-o','linewidth',2,'markersize',5);
+p4=plot(xdz,ng3,'-o','linewidth',2,'markersize',5);
+p5=plot(xdz,ng4,'-o','linewidth',2,'markersize',5);
+p6=plot(xdz,ng5,'-o','linewidth',2,'markersize',5);
+
+ legend([p1 p2 p3 p4 p5 p6],' g = 0',' g = 1',' g = 2',' g = 3',...
+     ' g = 4',' g = 5');
+xlabel('QC Histogram Bin Size "dz" (cm)');ylabel('Number of Lowest Goodness Values')
+title(['Total Number of Survey Points: ' num2str(length(z)) ]);
+
+% 
+% r1=nan(size(ng0));
+% [~,p] = sort(ng0(:),'descend');
+% r1(p) = 1:length(r1(:));
+% 
+% r2=nan(size(s));
+% [~,p] = sort(s(:),'ascend');
+% r2(p) = 1:length(r2(:));
+% 
+% N=round(length(z)/((max(z)-min(z))/.1));
+% histogram(z(:),[floor(min(z)):.1:ceil(max(z))]);
+% [np,~]=histcounts(z(:),[floor(min(z)):.1:ceil(max(z))]);
+% np=sort(np(np > 0));N=round(mean(np(3:end)));
+% 
+% for frac=1:2:9
+% N=ceil(length(z)/frac)
+% end

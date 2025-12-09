@@ -1,0 +1,77 @@
+%  Basic Viewer for Sand Survey Database NETCDF files
+
+close all
+
+% figure out paths to mfiles and data based on this m-script's location
+toolboxpath=mfilename('fullpath');
+toolfolder=fileparts(toolboxpath);
+mopfolder=strrep(toolfolder,'toolbox','');
+
+fig=figure('Name','CPGMOP Database','NumberTitle','off',...
+    'position',[90 800 1300 60],'ToolBar','none','MenuBar','none');
+set(fig,'Color',[223 206 157]/256);
+
+fig2=figure('NumberTitle','off',...
+     'position',[90 70 1300 680],'ToolBar','figure','MenuBar','none');
+
+set(0,'DefaultUicontrolFontSize',20);
+set(0,'DefaultUicontrolFontWeight','normal');
+
+% get lists of 500's mop mat files in the CPGMOP database
+SAf=dir([mopfolder 'M000*SA.mat']);
+SGf=dir([mopfolder 'M000*SG.mat']);
+SMf=dir([mopfolder 'M000*SM.mat']);
+GMf=dir([mopfolder 'M000*GM.mat']);
+SWf=dir([mopfolder 'M000*SW.mat']);
+
+% extract list of Mop Numbers
+MopCellStr=strrep(strrep({SAf.name}','M',''),'SA.mat','');
+MopNums=cell2mat(MopCellStr);
+% load first 
+
+bc=([223 206 157]/256); % gui figure background color
+
+% start with lowest Mop number
+MOPhead=uicontrol(fig,'style','text','position',[40 20 80 40],...
+    'string','MOP #','foregroundcolor','b','backgroundcolor',bc);
+MOPmenu=uicontrol(fig,'style','popup','position',[20 1 120 40],...
+   'string',MopCellStr,'Value',1,'callback',...
+   'updateMOPsrv;viewStruct');
+
+% list of struct array and mat file types
+Scall=['viewSAstruct';'viewSGstruct';'viewSMstruct';...
+    'viewGMstruct';'viewSWstruct'];
+Sdesc=[{'SA - 1m Avg Survey Data                           '},...
+       {'SG - 1m Gridded Survey Data                       '},...
+       {'SM - Survey Morphological Parameters              '},...
+       {'GM - Global (All Surveys) Morphological Parameters'},...
+       {'SW - Wave Parameters Since the Previous Survey    '}]';
+
+Shead=uicontrol(fig,'style','text','position',[340 20 180 40],...
+    'string','matfile Struct Array','foregroundcolor','b','backgroundcolor',bc);
+Smenu=uicontrol(fig,'style','popup','position',[180 1 600 40],...
+    'string',Sdesc,'Value',1,'callback','viewStruct');
+
+% start with first survey is SA array
+Snum=1;
+
+% view first SA survey
+viewStruct;
+
+% viewSA=uicontrol(fig,'style','pushbutton','position',[350 15 130 30],...
+%     'string','SA (1m AVG)','foregroundcolor','w','backgroundcolor','b',...
+%     'callback','viewSAstruct');
+% viewSG=uicontrol(fig,'style','pushbutton','position',[500 15 130 30],...
+%     'string','SG (1m Grid)','foregroundcolor','w','backgroundcolor','b',...
+%     'callback','viewSGstruct');
+% viewSM=uicontrol(fig,'style','pushbutton','position',[650 15 140 30],...
+%     'string','SM (Morpho)','foregroundcolor','w','backgroundcolor','b',...
+%     'callback','viewSMstruct');
+% viewGM=uicontrol(fig,'style','pushbutton','position',[800 15 200 30],...
+%     'string','GM (Global Morpho)','foregroundcolor','w','backgroundcolor','b',...
+%     'callback','viewGMstruct');
+% viewSW=uicontrol(fig,'style','pushbutton','position',[1010 15 120 30],...
+%     'string','SW (Waves)','foregroundcolor','w','backgroundcolor','b',...
+%     'callback','viewSWstruct');
+% 
+

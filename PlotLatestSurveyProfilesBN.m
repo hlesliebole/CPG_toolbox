@@ -1,0 +1,150 @@
+clear all
+close all
+DefineMopPath
+
+for MopNumber=553:553
+    clear p
+%nr=10; % number of most recent profiles to plot
+%nr=16; % number of most recent profiles to plot
+if MopNumber == 555
+    nr=4;
+else
+nr=4;
+end
+
+figure('position',[48         213        1246         518]);
+ %----- add cobble sightings
+ 
+matfile=['M' num2str(MopNumber,'%5.5i') 'SA.mat'];
+load(matfile,'SA');
+ %  load Mop Transect Info
+load('MopTableUTM.mat','Mop');
+
+% divide mop area into 20 mop subtransects at 1m xshore resolution,
+%  with an extra 100m of back beach for each
+[x1d,xt,yt,xst,yst]=GetTransectLines(Mop,MopNumber,20,[-100 0]);
+
+idx=find(vertcat(SA.Class) > 1);
+Xutm=vertcat(SA.X);Yutm=vertcat(SA.Y);
+Xutm=Xutm(idx);Yutm=Yutm(idx);
+Z=vertcat(SA.Z);Z=Z(idx);
+dt=[];
+for n=1:size(SA,2)
+    dt=[dt' SA(n).Datenum*ones(size(SA(n).Z))']';
+end
+dt=dt(idx);
+
+[dp,NearIdx]=...
+    pdist2([yst(:),xst(:)],[double(Yutm),double(Xutm)],'euclidean','smallest',1);
+
+[row,col] = ind2sub(size(xst),NearIdx);
+
+hold on;pc=plot(x1d(col),Z,'m.','DisplayName','Past ATV Cobble Sightings');
+
+%--------------
+
+load(['M' num2str(MopNumber,'%5.5i') 'SM.mat' ],'SM');
+
+%figure;
+nn=0;
+ng=0;
+nskip=0;
+for n=1:nr+5
+    if n == nr+3
+        m=find([SM.Datenum] == datenum(2005,9,19));
+        SM(m).Z1Dtransect(SM(m).Z1Dtransect < 0)=NaN;
+    elseif n == nr+2
+        %m=find([SM.Datenum] == datenum(2021,9,22));
+        m=find([SM.Datenum] == datenum(2011,10,10));
+        SM(m).Z1Dtransect(SM(m).Z1Dtransect < 0)=NaN;
+    elseif n == nr+5
+        %m=find([SM.Datenum] == datenum(1997,10,12));
+        m=find([SM.Datenum] == datenum(2022,5,7));
+        SM(m).Z1Dtransect(SM(m).Z1Dtransect < 0)=NaN;
+    elseif n == nr+4
+        %m=find([SM.Datenum] == datenum(1997,10,12));
+        m=find([SM.Datenum] == datenum(1998,4,8));
+        SM(m).Z1Dtransect(SM(m).Z1Dtransect < 0)=NaN;
+    elseif n == nr+1
+        m=find([SM.Datenum] == datenum(2022,4,15));
+        SM(m).Z1Dtransect(SM(m).Z1Dtransect < 0)=NaN;
+    else
+       m=size(SM,2)+1-n-nskip;
+       while strcmpi(SM(m).Source,'iG8wheel') == 0
+           m=m-1;
+           nskip=nskip+1;
+       end
+    end
+%     if n==1;SM(m).Datenum=datenum(2021,10,11);end
+%     if n==2;SM(m).Datenum=datenum(2021,10,12);end
+%     if n==3;SM(m).Datenum=datenum(2021,10,13);end
+    
+    if ~isnan(min(SM(m).Z1Dmean)) 
+        
+    nn=nn+1;
+    z=SM(m).Z1Dtransect;z(z <-1.0)=NaN;
+    
+    %if numel(find(~isnan(z))) > 0
+        
+    xMSL=intersections([SM(m).X1D(1) SM(m).X1D(end)],[0.774 0.774],SM(m).X1D,SM(m).Z1Dtransect);
+    if isempty(xMSL);xMSL=999.9;end
+    if n == 1
+        p(nn)=plot(SM(m).X1D,z,'m-','linewidth',3,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm ' SM(m).Source]);hold on;
+     
+    elseif n > nr 
+      if n == nr+2
+        p(nn)=plot(SM(m).X1D,z,'k:','linewidth',2,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm ' SM(m).Source]);hold on;
+    elseif n == nr+5
+        p(nn)=plot(SM(m).X1D,z,'g-','linewidth',2,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm South Swell Max xMSL']);hold on;
+      elseif n == nr+4
+        p(nn)=plot(SM(m).X1D,z,'r-','linewidth',2,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm NASA/NOAA ATM LiDAR']);hold on;
+    elseif n == nr+3
+        p(nn)=plot(SM(m).X1D,z,'k-','linewidth',2,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm ' SM(m).Source]);hold on;
+      else  
+        p(nn)=plot(SM(m).X1D,z,'b-','linewidth',2,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm ' SM(m).Source]);hold on;  
+      end 
+    else
+        ng=ng+1;
+        p(nn)=plot(SM(m).X1D,z,'-','color',[.8 .8 .8]/ng,'linewidth',2,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm ' SM(m).Source]);hold on;
+    end
+    end
+    %end
+end
+
+% best historical fit index
+% bfidx=279;
+% nn=nn+1;
+% z=SM(bfidx).Z1Dmean;z(z < -0.7)=NaN;
+% p(nn)=plot(SM(bfidx).X1D,z,'k:','linewidth',2,'DisplayName',...
+%         [datestr(SM(bfidx).Datenum,'mm/dd/yy') ' Best Past Fit z=0.5-1.0m']);
+    
+xl=get(gca,'xlim');
+set(gca,'xlim',[0 xl(2)]);
+%yl=get(gca,'ylim');set(gca,'ylim',[0 yl(2)]);
+
+plot(xl,[2.119 2.119],'k--');text(xl(2),2.26,' HAT','fontsize',14);
+plot(xl,[1.566 1.566],'k--');text(xl(2),1.7,' MHHW','fontsize',14);
+plot(xl,[1.344 1.344],'k--');text(xl(2),1.44,' MHW','fontsize',14);
+plot(xl,[.774 .774],'k--');text(xl(2),.9,' MSL','fontsize',14);
+plot(xl,[-0.058 -0.058],'k--');text(xl(2),0.05,' MLLW','fontsize',14);
+%ps=plot(77,-0.31,'k.','markersize',20,'DisplayName','Paros');
+set(gca,'xdir','reverse','fontsize',14);grid on;box on;
+legend([p pc],'location','eastoutside');
+title(['MOP ' num2str(MopNumber) ' Transect Profiles']);
+xlabel('Cross-shore Distance (m)');
+ylabel('Elevation (m, NAVD88)');
+%set(gca,'ylim',[-1 4]);
+
+if nr > 3
+makepng(['MOP' num2str(MopNumber) 'GBR22profiles.png'])
+else
+makepng(['MOP' num2str(MopNumber) 'GBR22profiles.png'])  
+end
+end  

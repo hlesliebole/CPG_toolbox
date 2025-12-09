@@ -1,0 +1,321 @@
+
+%---------------------
+%  Step 1
+%---------------------
+
+% Makes "DataSets" struct array with key data set information needed
+%  to fine the data files.
+
+%
+% This version defines 3 San Diego County topobathy survey types
+%  that are currently stored in reefbreak1/group
+%
+% - SIO GPS Surveys (atv,dolly,jetski)
+% - SIO UTexas Lidar (2000-2010) [including 1997 & 1998 NOAA/USGS ATM]
+% - SIO Truck Lidar (2018-)
+
+% A survey type can have more than one DataSet definition depending on file
+%  naming conventions.
+
+%    DataSets(n).name : Data set name (Gps,UTAir,Truck)
+%
+%    DataSets(n).title : Character string description of data set
+%
+%    DataSets(n).filehead : Defines the portion of the filepath, usually up to 
+%    encountering the YYYYMMDD_MOPSTART_MOPEND portion of the file folder 
+%    or filename string. This could be either a folder name or a folder name 
+%    plus a portion of the file name depending on the data source folder and
+%    file name conventions.  This is handy for parsing out the date and mop
+%    range associated with a survey data file.
+%
+%    DataSets(n).filepath :  the actual wildcard search string to use
+%    when looking for files with the matlab dir command
+%
+
+% Settings for mounted reefbreak1 data directories
+% Check if this is a pc to set the reefbreak1 group directory 
+
+if ispc
+    group='Y:\';  % eg. Adam's PC mount point
+else
+    group='/Volumes/group/'; % Mac mount point
+end
+
+%-------------------------------------------------------------------------
+% 1. atv-jumbo (Gps) survey data 
+%
+
+% Note 1: different file naming conventions requires 2 data set definitions/searches 
+% to find all the Gps survey files
+%
+% Prior to 20040206, there is just a *.adj2011 file.
+%
+% Starting with  topobathy/20040206_00520_00597_posncex_atv_alongshore
+% The folder contain both a  *.adj2011 file and *.navd88 file. file
+% processing logic is needed to choose the navd88 file when both
+% have been found with the separate searches.
+% 
+% Starting with topobathy/20111010_00520_00598_posncex_jumbo
+% The folders only have a *.navd88 file
+%
+% Note 2: The .llz.navd88 files can have 3 (lat,lon,z), 4 (lat,lon,z,time), 
+% 5 (lat,lon,z,time,substrate_code), or 
+% 7 (lat,lon,Nutm,Eutm,z,time,substrate_code) columns. Not an issue when
+% defining the data set paths here, but requires flexible code when reading
+% the data files themselves as there is no way to tell some of these apart
+% from the file name itself.
+
+DataSets(1).name='Gps';
+DataSets(1).title='SIO In Situ GPS Surveys';
+% /Volumes/group/topobathy/
+DataSets(1).filehead=fullfile(group,'topobathy',filesep);
+% /Volumes/group/topobathy/*/filtered*.ll*.adj2011
+DataSets(1).filepath=fullfile(group,'topobathy','*','filtered*.ll*.adj2011');
+
+DataSets(2).name='Gps';
+DataSets(2).title='SIO In Situ GPS Surveys';
+% /Volumes/group/topobathy/
+DataSets(2).filehead=fullfile(group,'topobathy',filesep);
+% /Volumes/group/topobathy/*/filtered*.ll*.navd88
+DataSets(2).filepath=fullfile(group,'topobathy','*','filtered*.ll*.navd88');
+
+%-------------------------------------------------------------------------
+% 2. SIO/UTexas Airborne LiDAR 
+%
+% group/LiDAR/LiDAR_Airborne/YYYYMMDD_MopStart_MopEnd_NoWaves_SDAirborne/Beach_Only/YYYYMMDD_MopStart_MopEnd_NoWaves_SDAirborne_beach_ground.txt
+%
+
+% AirFiles='/Volumes/group/LiDAR/LiDAR_Airborne/*/Beach_Only/*ground.txt';
+
+% 3 columns  (Lon,Lat,z)
+
+DataSets(3).name='UTAir';
+DataSets(3).title='SIO-UT Airborne Lidar Surveys';
+%DataSets(3).filehead='/Volumes/group/LiDAR/LiDAR_Airborne/';
+DataSets(3).filehead=fullfile(group,'LiDAR','LiDAR_Airborne',filesep);
+%DataSets(3).filepath='/Volumes/group/LiDAR/LiDAR_Airborne/*/Beach_Only/*ground.txt';
+DataSets(3).filepath=...
+    fullfile(group,'LiDAR','LiDAR_Airborne','*','Beach_Only','*ground.txt');
+
+
+%-------------------------------------------------------------------------
+% 3. SIO Truck LiDAR 
+%
+% group/LiDAR/VMZ2000_Truck/LiDAR_Processed_Level2/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType/Beach_Only/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType_ground.tif
+%
+%
+% TrkFiles='/Volumes/group/LiDAR/VMZ2000_Truck/LiDAR_Processed_Level2/*/Beach_Only/*ground.tif';
+
+DataSets(4).name='Trk';
+DataSets(4).title='SIO Truck Lidar Surveys';
+%DataSets(4).filehead='/Volumes/group/LiDAR/VMZ2000_Truck/LiDAR_Processed_Level2/';
+DataSets(4).filehead=...
+fullfile(group,'LiDAR','VMZ2000_Truck','LiDAR_Processed_Level2',filesep);
+%DataSets(4).filepath='/Volumes/group/LiDAR/VMZ2000_Truck/LiDAR_Processed_Level2/*/Beach_Only/2*ground.tif';
+DataSets(4).filepath=...
+fullfile(group,'LiDAR','VMZ2000_Truck','LiDAR_Processed_Level2',...
+'*','Beach_Only','2*ground.tif');
+
+%-------------------------------------------------------------------------
+% 4. SIO Truck MiniRanger 
+%
+% group/LiDAR/MiniRanger_Truck/LiDAR_Processed_Level2/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType/Beach_Only/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType_ground.tif
+%
+%
+% TrkMRFiles='/Volumes/group/LiDAR/MiniRanger_Truck/LiDAR_Processed_Level2/*/Beach_Only/*ground.tif';
+
+DataSets(5).name='TrkMR';
+DataSets(5).title='SIO Truck MiniRanger Surveys';
+DataSets(5).filehead=...
+fullfile(group,'LiDAR','MiniRanger_Truck','LiDAR_Processed_Level2',filesep);
+DataSets(5).filepath=...
+fullfile(group,'LiDAR','MiniRanger_Truck','LiDAR_Processed_Level2',...
+'*','Beach_Only','2*ground.tif');
+
+
+%-------------------------------------------------------------------------
+% 5. SIO ATV MiniRanger 
+%
+% group/LiDAR/MiniRanger_ATV/LiDAR_Processed_Level2/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType/Beach_Only/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType_ground.tif
+%
+%
+% AtvMRFiles='/Volumes/group/LiDAR/MiniRanger_Truck/LiDAR_Processed_Level2/*/Beach_Only/*ground.tif';
+
+DataSets(6).name='AtvMR';
+DataSets(6).title='SIO ATV MiniRanger Surveys';
+DataSets(6).filehead=...
+fullfile(group,'LiDAR','MiniRanger_ATV','LiDAR_Processed_Level2',filesep);
+DataSets(6).filepath=...
+fullfile(group,'LiDAR','MiniRanger_ATV','LiDAR_Processed_Level2',...
+'*','Beach_Only','2*ground.tif');
+
+
+%-------------------------------------------------------------------------
+% 6. SIO Drone MiniRanger 
+%
+% group/LiDAR/MiniRanger_Drone/LiDAR_Processed_Level2/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType/Beach_Only/YYYYMMDD_MopStart_MopEnd_NoWaves_SurveyType_ground.tif
+%
+%
+% DrnMRFiles='/Volumes/group/LiDAR/MiniRanger_Drone/LiDAR_Processed_Level2/*/Beach_Only/*ground.tif';
+
+DataSets(7).name='DrnMR';
+DataSets(7).title='SIO Drone MiniRanger Surveys';
+DataSets(7).filehead=...
+fullfile(group,'LiDAR','MiniRanger_Drone','LiDAR_Processed_Level2',filesep);
+DataSets(7).filepath=...
+fullfile(group,'LiDAR','MiniRanger_Drone','LiDAR_Processed_Level2',...
+'*','Beach_Only','2*ground.tif');
+
+DataSets
+
+%-------------------------------------------------
+% Step2
+%-------------------------------------------------
+
+% Uses "DataSets" struct array of survey file name conventionsand  definitions 
+% to generate the struct array "Survey", a master list containing all
+% individual survey file information.
+
+% Survey(n).DataSetNum : Index number for DataSets struct array info
+% Survey(n).file : Full filename path
+% Survey(n).datenum : Survey date number (convenient for plotting)
+% Survey(n).source :  Survey (eg. Gps, UTAir, Truck...)
+% Survey(n).type : Parsed piece of filename after the mop range info;
+%                  eg. can be used to find types that include "jumbo".
+% Survey(n).year  : Survey year (for convenience when writing search code)
+% Survey(n).month : Survey month (for convenience when writing search code)
+% Survey(n).day : Survey day (for convenience when writing search code)
+% Survey(n).MopStart : Starting Mop (for convenience when writing search code)
+% Survey(n).MopEnd : Ending Mop (for convenience when writing search code)
+
+
+% Note:  This script contains some logic to deal with redundancies
+% and naming inconsistencies that developed over time with the atv-jumbo
+% survey database, eg. past reprocessing of some of these surveys to update 
+% the datums etc.  This code may require changes (simplification! if this 
+% issue is dealt with by moving/changing filenames in the data base at 
+% some point.
+
+% Settings to limit the Mop range to include in the master list
+
+% MopStart=495; % start south end LJ shores 
+% MopEnd=636; % end Del Mar inlet
+MopStart=1; % MX border 
+MopEnd=11594; % OR border
+ns=0; % survey counter
+
+nns=size(DataSets,2); % number of file data sets
+
+clear Survey
+
+%for nn=[1 2 4] % limit to SIO Gps and Truck Lidar (data sets 1-3)
+for nn=1:nns % loop through data sets
+    
+fprintf(1,'Getting %s surveys with wildcard path:\n',DataSets(nn).name)
+fprintf(1,'%s\n',DataSets(nn).filepath)
+filesd=dir(DataSets(nn).filepath);
+ndirs=size(filesd,1);
+fprintf('%g survey directories found. Checking for Shore Box overlap...\n',ndirs) 
+
+% loop through directory names, parse out survey date and mop range, and
+%  test for overlap with the mop range settings
+
+for n=1:ndirs
+    
+    info=regexprep(fullfile(filesd(n).folder,filesd(n).name),...
+        regexprep(DataSets(nn).filehead,'\\','\\\'), '');
+    fprintf('%s\n',info)
+    info=regexprep(info,'_D_', ' ');
+    info=regexprep(info,'_', ' ');
+    info=regexp(info,'\S*','match');% turns info into cell array of strings
+    
+    if(size(info,2) > 3)  % check to make sure directory name is legit
+        
+    SurveyDatenum=datenum(info{1},'yyyymmdd'); % survey date as datenum
+    SurveyStart=str2num(info{2}); % survey mop start as number
+    SurveyEnd=str2num(info{3}); % survey mop end as number
+    SurveyType=strcat(info{4:end});
+    %fprintf('%g %g %g %g %g\n',SurveyDatenum,SurveyStart,SurveyEnd,...
+    %    MopStart,MopEnd)
+    
+    % check if survey and mop range overlap
+    
+    if( (SurveyStart < MopEnd) && SurveyEnd > MopStart) 
+        
+      %fprintf('Including %s\n',filesd(n).name)
+      % if there is overlap, save survey data file name and info
+      sfile=dir([filesd(n).folder '/' filesd(n).name]);
+      
+      fprintf('** Matched ** %g %g %s\n',size(sfile),...
+          fullfile(sfile(1).folder,sfile(1).name))
+      %[sfile(1).folder '/' sfile(1).name])
+      
+      if(size(sfile,1) == 1) % check if found a file
+          
+          % If this is Gps data, then check if the Gps survey date had
+          % been previously found (as a .adj2011 file) if so, overwrite
+          % that entry with the new (.navd88 file) info.  Otherwise
+          % advance the counter and add the new survey to the list
+       if(strcmpi(DataSets(nn).name,'gps') && ns > 0)
+            igps=find(strcmp({Survey.source}, 'Gps') == 1 );
+            i=find(vertcat(Survey(igps).datenum) == SurveyDatenum);
+            if(~isempty(i))
+            Survey(igps(i)).file=fullfile(sfile(1).folder,sfile(1).name);
+            fprintf('** Replaced Gps filename ** %g %s\n',i,Survey(i).file)
+            else
+            ns=ns+1;     
+        % if multiple datafiles in same directory, use first one
+        %fprintf('   survey file: %s\n',sfile(1).name)
+            Survey(ns).DataSetNum=nn;
+            Survey(ns).File=fullfile(sfile(1).folder,sfile(1).name);
+            Survey(ns).Datenum=SurveyDatenum;
+            Survey(ns).Source=DataSets(nn).name;
+            Survey(ns).Type=SurveyType;
+            Survey(ns).Year=str2num(datestr(SurveyDatenum,'yyyy'));
+            Survey(ns).Month=str2num(datestr(SurveyDatenum,'mm'));
+            Survey(ns).Day=str2num(datestr(SurveyDatenum,'dd'));
+            Survey(ns).MopStart=SurveyStart;
+            Survey(ns).MopEnd=SurveyEnd;
+         
+          
+        fprintf('** Matched ** %g %s\n',ns,Survey(ns).file)
+            end
+       else
+              ns=ns+1;     
+        % if multiple datafiles in same directory, use first one
+        %fprintf('   survey file: %s\n',sfile(1).name)
+            Survey(ns).DataSetNum=nn;
+            Survey(ns).File=fullfile(sfile(1).folder,sfile(1).name);
+            Survey(ns).Datenum=SurveyDatenum;
+            Survey(ns).Source=DataSets(nn).name;
+            Survey(ns).Type=SurveyType;
+            Survey(ns).Year=str2num(datestr(SurveyDatenum,'yyyy'));
+            Survey(ns).Month=str2num(datestr(SurveyDatenum,'mm'));
+            Survey(ns).Day=str2num(datestr(SurveyDatenum,'dd'));
+            Survey(ns).MopStart=SurveyStart;
+            Survey(ns).MopEnd=SurveyEnd;
+
+          
+        fprintf('** Matched ** %g %s\n',ns,Survey(ns).file)  
+       end
+      end
+          
+    end
+    
+    else % end bad directory name check
+       %fprintf('   *** Bad Survey Directory Name: %s\n',filesd(n).name) 
+    end  
+end
+
+fprintf('%g surveys found between Mops %g - %g\n',ns,MopStart,MopEnd)
+end
+
+Survey
+
+T=struct2table(Survey);
+sortedT = sortrows(T, 'Datenum');
+Survey=table2struct(sortedT)';
+clear T sortedT;
+
+fprintf('Saving Survey struct array to SurveyMasterList.mat\n')
+save SurveyMasterList.mat Survey

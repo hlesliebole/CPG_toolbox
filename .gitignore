@@ -1,0 +1,19 @@
+# MATLAB temporary and backup files
+*.asv
+*.mex*
+*.fig
+
+# secrets
+google_api_key_local.m
+
+# Large data files (tweak to taste)
+*.mat
+*.nc
+*.h5
+*.hdf5
+*.csv
+
+# OS / editor cruft
+.DS_Store
+.vscode/
+.idea/

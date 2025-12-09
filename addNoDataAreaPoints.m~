@@ -1,0 +1,47 @@
+function [xadd,yadd,zadd]=addNoDataAreaPoints(xsb,ysb,zsb,maxdist)
+
+% used by BuildSGmatfiles.m
+
+%  adds "no data" NaN points around edges of survey data gaps
+%   defined by maxdist to avoid gridding 
+
+wsize=round((maxdist-1)/2)*2+1;% insure odd number wsize x wsize 2d mean window in meters
+
+isx=round(xsb);
+isy=round(ysb);
+xmin=min(isx)-1*wsize; % make grid limits based on wsize
+xmax=max(isx)+1*wsize; % make grid limits based on wsize
+ymin=min(isy)-1*wsize; % make grid limits based on wsize
+ymax=max(isy)+1*wsize; % make grid limits based on wsize
+
+[ix,iy]=meshgrid(xmin:xmax,ymin:ymax);
+z=ix*0;
+i=sub2ind(size(z),isy-ymin+1,isx-xmin+1);
+z(i)=1;
+
+W=ones(wsize,wsize); %window array
+
+% convolution yields number of survey points in window
+% centered on each grid point
+NR=conv2(z,W,'same'); % max NR = wsize^2
+
+% find edges of NaN space surrounding survey data points
+ NR(NR > 1)=1;
+ [ye,xe]=find(diff(NR,1,2) ~= 0); % horizontal edges
+ i=sub2ind(size(NR),ye,xe);xnan=ix(i);ynan=iy(i);
+ [ye,xe]=find(diff(NR,1,1) ~= 0); % vertical edges
+ i=sub2ind(size(NR),ye,xe);
+ xnan=[xnan' ix(i)']';
+ ynan=[ynan' iy(i)']';
+ 
+% remove any duplicate edge points
+[uxy,ia,ic]=unique([xnan, ynan],'rows');xnan=xnan(ia);ynan=ynan(ia);
+ 
+ zadd=[zsb' NaN*xnan']';
+ xadd=[xsb' xnan']';
+ yadd=[ysb' ynan']';
+ 
+ %figure;plot(xnan,ynan,'r.');hold on;
+ %hold on;plot(isx,isy,'g.')
+ 
+end

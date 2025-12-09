@@ -1,0 +1,84 @@
+clear all
+%close all
+%addpath /volumes/group/MOPS
+for MopNumber=568%580:584
+%nr=10; % number of most recent profiles to plot
+nr=16; % number of most recent profiles to plot
+nr=5;
+
+figure('position',[191   261   846   491]);
+ %----- add cobble sightings
+ 
+matfile=['M' num2str(MopNumber,'%5.5i') 'SA.mat'];
+load(matfile,'SA');
+ %  load Mop Transect Info
+load('MopTableUTM.mat','Mop');
+
+% divide mop area into 20 mop subtransects at 1m xshore resolution,
+%  with an extra 100m of back beach for each
+[x1d,xt,yt,xst,yst]=GetTransectLines(Mop,MopNumber,20,[-100 0]);
+
+idx=find(vertcat(SA.Class) > 1);
+Xutm=vertcat(SA.X);Yutm=vertcat(SA.Y);
+Xutm=Xutm(idx);Yutm=Yutm(idx);
+Z=vertcat(SA.Z);Z=Z(idx);
+dt=[];
+for n=1:size(SA,2)
+    dt=[dt' SA(n).Datenum*ones(size(SA(n).Z))']';
+end
+dt=dt(idx);
+
+[dp,NearIdx]=...
+    pdist2([yst(:),xst(:)],[double(Yutm),double(Xutm)],'euclidean','smallest',1);
+
+[row,col] = ind2sub(size(xst),NearIdx);
+
+hold on;pc=plot(x1d(col),Z,'m.','DisplayName','Past ATV Cobble Sightings');
+
+%--------------
+
+load(['M' num2str(MopNumber,'%5.5i') 'SM.mat' ],'SM');
+
+%figure;
+nn=0;
+for n=1:nr    
+    m=size(SM,2)-nr+n;
+%     if n==1;SM(m).Datenum=datenum(2021,10,11);end
+%     if n==2;SM(m).Datenum=datenum(2021,10,12);end
+%     if n==3;SM(m).Datenum=datenum(2021,10,13);end
+    if ~isnan(min(SM(m).Z1Dmean))
+    nn=nn+1;
+    z=SM(m).Z1Dmean;%z(z <-1.0)=NaN;
+    xMSL=intersections([SM(m).X1D(1) SM(m).X1D(end)],[0.774 0.774],SM(m).X1D,SM(m).Z1Dmean);
+
+    p(nn)=plot(SM(m).X1D,z,'-','linewidth',2,'DisplayName',...
+        [datestr(SM(m).Datenum,'mm/dd/yy') ' xMSL=' num2str(xMSL(end),'%4.1f') 'm ' SM(m).Source]);hold on;
+    end
+end
+
+% best historical fit index
+% bfidx=279;
+% nn=nn+1;
+% z=SM(bfidx).Z1Dmean;z(z < -0.7)=NaN;
+% p(nn)=plot(SM(bfidx).X1D,z,'k:','linewidth',2,'DisplayName',...
+%         [datestr(SM(bfidx).Datenum,'mm/dd/yy') ' Best Past Fit z=0.5-1.0m']);
+    
+xl=get(gca,'xlim');
+set(gca,'xlim',[0 xl(2)]);
+%yl=get(gca,'ylim');set(gca,'ylim',[0 yl(2)]);
+
+plot(xl,[.774 .774],'k--');text(xl(2),.9,' MSL','fontsize',14);
+plot(xl,[-0.058 -0.058],'k--');text(xl(2),0.05,' MLLW','fontsize',14);
+%ps=plot(77,-0.31,'k.','markersize',20,'DisplayName','Paros');
+set(gca,'xdir','reverse','fontsize',14);grid on;
+legend([p pc],'location','northwest');
+title(['MOP ' num2str(MopNumber) ' Mean Profiles']);
+xlabel('Cross-shore Distance (m)');
+ylabel('Elevation (m, NAVD88)');
+
+if nr > 3
+makepng(['MOP' num2str(MopNumber) 'profiles.png'])
+else
+  makepng(['MOP' num2str(MopNumber) 'Last3profiles.png'])  
+end
+end  
