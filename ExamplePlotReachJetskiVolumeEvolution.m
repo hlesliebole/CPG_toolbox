@@ -12,17 +12,17 @@
 
 %% settings
 % 1. Path to CPGMOP data files
-%mpath='/volumes/group/MOPS/'; % reefbreak on a mac
-mpath='/Users/William/Desktop/MOPS/';
+mpath='/volumes/group/MOPS/'; % reefbreak on a mac
+%mpath='/Users/William/Desktop/MOPS/';
 
 % 2. Mop range to use in volume change calculations
-MopStart=668;MopEnd=682; % start and mop numbers for Cardiff
-%MopStart=568;MopEnd=598; % start and mop numbers for north TP
+%MopStart=668;MopEnd=682; % start and mop numbers for Cardiff
+MopStart=570;MopEnd=590; % start and mop numbers for north TP
 
 % 3. Date range to consider. The first and last dates to not
 %    have to match survey dates precisely
-StartDate=datenum(2010,11,22);
-EndDate=datenum(2011,3,10);
+StartDate=datenum(2022,8,1);%datenum(2010,11,22);
+EndDate=datenum(today);%datenum(2011,3,10);
 
 % 4. Elevation bin sizes (m) to use when calculating volume change as 
 %    a function of the starting survey grid elevations. Larger
@@ -127,12 +127,12 @@ for n=2:length(jetski)
     mu=round(-mu/L); 
     % plot results
     fprintf('%s\n',[datestr(SG(jetski(n)).Datenum) '  \mu_{SSD} = ' num2str(mu)])
-    plot([min(z0bin(:)):max(z0bin(:))]*zRes,dv/1000,'.-','color',col(n-1,:),...
+    plot((min(z0bin(:)):max(z0bin(:)))*zRes,dv/1000,'.-','color',col(n-1,:),...
     'markersize',15,'DisplayName',...
     [datestr(SG(jetski(n)).Datenum) '  \mu_{SSD} = ' num2str(mu)] ,'linewidth',2);hold on
 end
 grid on;
-legend('numcolumns',2)
+legend('numcolumns',2,'Location','eastoutside')
 set(gca,'xtick',min(z0bin(:)):max(z0bin(:))*zRes,'xlim',[min(z0bin(:)) max(z0bin(:))]*zRes);
 xlabel([ datestr(SG(jetski(1)).Datenum) ' Nearshore Elevation, Z_o (m, MSL)']);
 ylabel('Net Volume Change Density (m^{3} x 1000 / dZ_o )');
@@ -144,7 +144,7 @@ set(gca,'position',[0.1300    0.4100    0.7750 0.5150])
 %% add wave Hs time series as 2nd axes
 
 % use Mop in middle of Cardiff for wave info
-MopNumber=675;
+MopNumber=580;%675;
 stn=['D0' num2str(MopNumber)];
 
 urlbase=...  % nearshore station
@@ -184,10 +184,11 @@ ylabel('Hs (m)')
 xlabel('Date')
 set(gca,'fontsize',14);
 grid on;
-datetick('x','mm/dd')
+%datetick('x','mm/dd')
 
 % legend
-makepng('CardiffFrequentJetskiEvolution.png')
+makepng('Torrey20222025FrequentJetskiEvolution.png')
+%makepng('CardiffFrequentJetskiEvolution.png')
 
 %
 % 
